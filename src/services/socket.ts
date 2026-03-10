@@ -6,7 +6,7 @@ interface ServerToClientEvents {
   'chat:message': (data: MessagePayload) => void;
   'chat:user_joined': (data: UserEvent) => void;
   'chat:user_left': (data: UserEvent) => void;
-  'presence:user_online': (data: { userId: string; username: string }) => void;
+  'presence:user_online': (data: { userId: string; username: string; estado?: string }) => void;
   'presence:user_offline': (data: { userId: string; username: string }) => void;
   'presence:user_typing': (data: { userId: string; isTyping: boolean; room?: string }) => void;
   'turnos:created': (data: TurnoPayload) => void;
@@ -19,7 +19,7 @@ interface ClientToServerEvents {
   'chat:message': (data: { message: string; room?: string }) => void;
   'chat:join_room': (data: { roomId: string }) => void;
   'chat:leave_room': (data: { roomId: string }) => void;
-  'presence:online': () => void;
+  'presence:online': (data?: { username: string; estado: string }) => void;
   'presence:offline': () => void;
   'presence:typing': (data: { isTyping: boolean; room?: string }) => void;
   'turnos:subscribe': (data: { doctorId?: string; date?: string }) => void;

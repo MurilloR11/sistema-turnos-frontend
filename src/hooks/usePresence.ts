@@ -4,6 +4,7 @@ import socket from '../services/socket';
 interface User {
   userId: string;
   username: string;
+  estado?: string;
 }
 
 export function usePresence() {
