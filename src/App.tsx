@@ -1,136 +1,105 @@
-﻿import { useState, useEffect } from 'react'
-import socket from './services/socket'
-import { Chat } from './components/Chat'
-import { TurnosList } from './components/TurnosList'
-import { usePresence } from './hooks/usePresence'
-import { useUser } from './context/UserContext'
-import { OnboardingScreen } from './components/Onboarding/OnboardingScreen'
-import './App.css'
+﻿import { useState, useEffect } from 'react';
+import { Sidebar } from './components/Sidebar';
+import { Topbar } from './components/Topbar';
+import { Inicio } from './components/screens/Inicio';
+import { MiTurno } from './components/screens/MiTurno';
+import { Solicitar } from './components/screens/Solicitar';
+import { OnboardingScreen } from './components/Onboarding/OnboardingScreen';
+import { useUser } from './context/UserContext';
+import type { Screen } from './components/Sidebar';
+import './index.css';
 
-const ESTADO_LABELS: Record<string, string> = {
-  'normal': 'Normal',
-  'embarazada': 'Embarazada',
-  'adulto_mayor': 'Adulto mayor',
-  'discapacitado/a': 'Discapacitado/a',
+const screenTitles: Record<Screen, string> = {
+  inicio:    'Inicio',
+  miturno:   'Mi Turno',
+  solicitar: 'Solicitar',
 };
 
 function App() {
-  const { isRegistered, clear } = useUser()
-  const [isConnected, setIsConnected] = useState(socket.connected)
-  const [currentRoom, setCurrentRoom] = useState<string>('general')
-  const [activeTab, setActiveTab] = useState<'turnos' | 'chat'>('turnos')
-  const { onlineUsers, onlineCount } = usePresence()
+  const { isRegistered, clear } = useUser();
+  const [screen, setScreen] = useState<Screen>('inicio');
+  const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
 
   useEffect(() => {
-    socket.on('connect', () => setIsConnected(true))
-    socket.on('disconnect', () => setIsConnected(false))
-
-    return () => {
-      socket.off('connect')
-      socket.off('disconnect')
-    }
-  }, [])
+    const check = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) setCollapsed(true);
+    };
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   if (!isRegistered) {
-    return <OnboardingScreen />
+    return <OnboardingScreen />;
   }
 
   return (
-    <div className="app">
-      <header className="header">
-        <div className="header-content">
-          <div className="header-title">
-            <h1>Sistema de Turnos Médicos</h1>
-            <p className="subtitle">Gestión de citas y consultas en tiempo real</p>
-          </div>
-          <div className="status-bar">
-            <span className={isConnected ? 'status-online' : 'status-offline'}>
-              <span className={`status-dot ${isConnected ? 'dot-online' : 'dot-offline'}`} />
-              {isConnected ? 'Conectado' : 'Desconectado'}
-            </span>
-            <span className="online-count">{onlineCount} usuarios en línea</span>
-          </div>
-          <button
-            onClick={clear}
-            className="logout-btn"
-            aria-label="Cerrar sesión"
-          >
-            Salir
-          </button>
-        </div>
-      </header>
+    <div
+      style={{
+        display: 'flex',
+        width: '100%',
+        height: '100vh',
+        overflow: 'hidden',
+        background: '#09090B',
+        color: '#FAFAFA',
+      }}
+    >
+      {isMobile && !collapsed && (
+        <div
+          onClick={() => setCollapsed(true)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.6)',
+            zIndex: 40,
+          }}
+        />
+      )}
 
-      <div className="main-content">
-        <aside className="sidebar">
-          <h3>Usuarios Online</h3>
-          <div className="online-users-list">
-            {onlineUsers.length === 0 ? (
-              <p className="no-users">Sin usuarios conectados</p>
-            ) : (
-              onlineUsers.map((user) => (
-                <div key={user.userId} className="online-user">
-                  <span className="user-status-dot" />
-                  <span className="user-name">{user.username}</span>
-                  {user.estado && (
-                    <span className="user-estado-badge">
-                      {ESTADO_LABELS[user.estado] ?? user.estado}
-                    </span>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        </aside>
+      <Sidebar
+        active={screen}
+        collapsed={collapsed}
+        mobile={isMobile}
+        onNavigate={(s) => { setScreen(s); if (isMobile) setCollapsed(true); }}
+        onLogout={clear}
+      />
 
-        <main className="main-panel">
-          <div className="tabs">
-            <button
-              className={`tab ${activeTab === 'turnos' ? 'active' : ''}`}
-              onClick={() => setActiveTab('turnos')}
-            >
-              Turnos
-            </button>
-            <button
-              className={`tab ${activeTab === 'chat' ? 'active' : ''}`}
-              onClick={() => setActiveTab('chat')}
-            >
-              Chat
-            </button>
-          </div>
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          minWidth: 0,
+          background: '#09090B',
+        }}
+      >
+        <Topbar
+          title={screenTitles[screen]}
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed((c) => !c)}
+        />
 
-          <div className="tab-content">
-            {activeTab === 'turnos' ? (
-              <TurnosList />
-            ) : (
-              <div className="chat-section">
-                <div className="room-selector">
-                  <button
-                    className={currentRoom === 'general' ? 'room-active' : ''}
-                    onClick={() => setCurrentRoom('general')}
-                  >
-                    General
-                  </button>
-                  <button
-                    className={currentRoom === 'urgencias' ? 'room-active' : ''}
-                    onClick={() => setCurrentRoom('urgencias')}
-                  >
-                    Urgencias
-                  </button>
-                  <button
-                    className={currentRoom === 'consultas' ? 'room-active' : ''}
-                    onClick={() => setCurrentRoom('consultas')}
-                  >
-                    Consultas
-                  </button>
-                </div>
-                <Chat roomId={currentRoom} />
-              </div>
-            )}
-          </div>
+        <main
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: isMobile ? '16px 12px' : '28px 32px',
+            background: '#09090B',
+          }}
+        >
+          {screen === 'inicio'    && <Inicio    onNavigate={setScreen} />}
+          {screen === 'miturno'  && <MiTurno />}
+          {screen === 'solicitar' && <Solicitar onNavigate={setScreen} />}
         </main>
       </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
+
+
