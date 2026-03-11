@@ -5,6 +5,7 @@ interface TopbarProps {
   title: string;
   collapsed: boolean;
   onToggleCollapse: () => void;
+  isChat?: boolean;
 }
 
 function ToggleButton({
@@ -38,7 +39,7 @@ function ToggleButton({
   );
 }
 
-export function Topbar({ title, collapsed, onToggleCollapse }: TopbarProps) {
+export function Topbar({ title, collapsed, onToggleCollapse, isChat }: TopbarProps) {
   return (
     <div
       style={{
@@ -82,7 +83,9 @@ export function Topbar({ title, collapsed, onToggleCollapse }: TopbarProps) {
         }}
       >
         <span className="status-pulse" />
-        <span style={{ fontSize: 11, color: '#A0A0AB' }}>12 en espera</span>
+        <span style={{ fontSize: 11, color: '#A0A0AB' }}>
+          {isChat ? 'Soporte en línea' : '12 en espera'}
+        </span>
       </div>
     </div>
   );

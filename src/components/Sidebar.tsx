@@ -4,12 +4,13 @@ import {
   IconHome,
   IconTicket,
   IconPlusCircle,
+  IconChat,
   IconGear,
   IconHelp,
   IconLogout,
 } from './ui/icons';
 
-export type Screen = 'inicio' | 'miturno' | 'solicitar';
+export type Screen = 'inicio' | 'miturno' | 'solicitar' | 'chat';
 
 interface SidebarProps {
   active: Screen;
@@ -125,6 +126,7 @@ const mainNav: { id: Screen; label: string; icon: ReactNode }[] = [
   { id: 'inicio',    label: 'Inicio',    icon: <IconHome /> },
   { id: 'miturno',  label: 'Mi Turno',  icon: <IconTicket /> },
   { id: 'solicitar', label: 'Solicitar', icon: <IconPlusCircle /> },
+  { id: 'chat',      label: 'Chat',      icon: <IconChat /> },
 ];
 
 const secondaryNav = [

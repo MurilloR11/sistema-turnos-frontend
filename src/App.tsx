@@ -4,6 +4,7 @@ import { Topbar } from './components/Topbar';
 import { Inicio } from './components/screens/Inicio';
 import { MiTurno } from './components/screens/MiTurno';
 import { Solicitar } from './components/screens/Solicitar';
+import { Chat } from './components/Chat';
 import { OnboardingScreen } from './components/Onboarding/OnboardingScreen';
 import { useUser } from './context/UserContext';
 import type { Screen } from './components/Sidebar';
@@ -13,6 +14,7 @@ const screenTitles: Record<Screen, string> = {
   inicio:    'Inicio',
   miturno:   'Mi Turno',
   solicitar: 'Solicitar',
+  chat:      'Chat',
 };
 
 function App() {
@@ -81,6 +83,7 @@ function App() {
           title={screenTitles[screen]}
           collapsed={collapsed}
           onToggleCollapse={() => setCollapsed((c) => !c)}
+          isChat={screen === 'chat'}
         />
 
         <main
@@ -94,6 +97,7 @@ function App() {
           {screen === 'inicio'    && <Inicio    onNavigate={setScreen} />}
           {screen === 'miturno'  && <MiTurno />}
           {screen === 'solicitar' && <Solicitar onNavigate={setScreen} />}
+          {screen === 'chat'      && <Chat />}
         </main>
       </div>
     </div>
