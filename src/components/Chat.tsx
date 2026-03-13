@@ -12,7 +12,7 @@ function formatTime(ts: string) {
 function AgentAvatar() {
   return (
     <div className="chat-avatar">
-      <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
         <circle cx="12" cy="7" r="4" />
       </svg>
@@ -22,7 +22,7 @@ function AgentAvatar() {
 
 function SendIcon() {
   return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <line x1="22" y1="2" x2="11" y2="13" />
       <polygon points="22 2 15 22 11 13 2 9 22 2" />
     </svg>
@@ -32,10 +32,10 @@ function SendIcon() {
 export function Chat({ roomId }: { roomId?: string }) {
   const [input, setInput] = useState('');
   const [focused, setFocused] = useState(false);
-  const { messages, sendMessage } = useChat(roomId);
+  const { messages, sendMessage, isConnected } = useChat(roomId);
   const { name } = useUser();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef    = useRef<HTMLTextAreaElement>(null);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -66,21 +66,39 @@ export function Chat({ roomId }: { roomId?: string }) {
 
   return (
     <div className="chat-screen">
-      {/* Header */}
+      {/* ── Header ── */}
       <div className="chat-header">
         <AgentAvatar />
         <div className="chat-header-info">
           <span className="chat-header-name">{AGENT_NAME}</span>
           <div className="chat-header-status">
-            <span className="chat-pulse-dot" />
-            <span className="chat-header-label">En línea · responde en minutos</span>
+            <span className={isConnected ? 'chat-pulse-dot' : 'chat-pulse-dot chat-pulse-dot--off'} />
+            <span className="chat-header-label">
+              {isConnected ? 'En línea · responde en minutos' : 'Reconectando...'}
+            </span>
           </div>
         </div>
+
+        {/* Disconnected banner */}
+        {!isConnected && (
+          <div className="chat-offline-pill">Sin conexión</div>
+        )}
       </div>
 
-      {/* Messages */}
+      {/* ── Messages ── */}
       <div className="chat-messages">
         <div className="chat-day-label">HOY</div>
+
+        {messages.length === 0 && (
+          <div className="chat-empty">
+            <div className="chat-empty-icon">
+              <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#3F3F46" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </div>
+            <p className="chat-empty-text">Inicia la conversación con soporte</p>
+          </div>
+        )}
 
         {messages.map((msg) => {
           const isUser = msg.username === name;
@@ -102,7 +120,7 @@ export function Chat({ roomId }: { roomId?: string }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
+      {/* ── Input ── */}
       <div className="chat-input-row">
         <div className={`chat-input-wrapper${focused ? ' chat-input-wrapper--focus' : ''}`}>
           <textarea
@@ -125,6 +143,7 @@ export function Chat({ roomId }: { roomId?: string }) {
             <SendIcon />
           </button>
         </div>
+        <p className="chat-hint">Enter para enviar · Shift+Enter para nueva línea</p>
       </div>
     </div>
   );

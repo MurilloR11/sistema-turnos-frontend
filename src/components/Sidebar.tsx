@@ -1,14 +1,9 @@
-import { useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  IconHome,
-  IconTicket,
-  IconPlusCircle,
-  IconChat,
-  IconGear,
-  IconHelp,
-  IconLogout,
+  IconHome, IconTicket, IconPlusCircle, IconChat,
+  IconGear, IconHelp, IconLogout,
 } from './ui/icons';
+import { useUser } from '../context/UserContext';
 
 export type Screen = 'inicio' | 'miturno' | 'solicitar' | 'chat';
 
@@ -19,108 +14,6 @@ interface SidebarProps {
   onNavigate: (screen: Screen) => void;
   onLogout: () => void;
 }
-
-// ─── Helper sub-components ───────────────────────────────────────────────────
-
-function NavItem({
-  icon,
-  label,
-  active,
-  collapsed,
-  onClick,
-}: {
-  icon: ReactNode;
-  label: string;
-  active: boolean;
-  collapsed: boolean;
-  onClick: () => void;
-}) {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={onClick}
-      onKeyDown={(e) => e.key === 'Enter' && onClick()}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: collapsed ? 0 : 10,
-        padding: collapsed ? '7px 0' : '7px 10px',
-        borderRadius: 6,
-        cursor: 'pointer',
-        color: active ? '#FAFAFA' : hovered ? '#FAFAFA' : '#A0A0AB',
-        background: active
-          ? 'rgba(59,130,246,0.08)'
-          : hovered
-          ? '#16161A'
-          : 'transparent',
-        transition: 'background 150ms ease, color 150ms ease',
-        fontSize: 13,
-        fontWeight: 500,
-        justifyContent: collapsed ? 'center' : 'flex-start',
-        userSelect: 'none',
-        outline: 'none',
-      }}
-    >
-      <span
-        style={{
-          color: active ? '#3B82F6' : 'inherit',
-          flexShrink: 0,
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
-        {icon}
-      </span>
-      <span
-        style={{
-          opacity: collapsed ? 0 : 1,
-          maxWidth: collapsed ? 0 : 140,
-          overflow: 'hidden',
-          whiteSpace: 'nowrap',
-          transition: 'opacity 150ms ease, max-width 200ms ease',
-        }}
-      >
-        {label}
-      </span>
-    </div>
-  );
-}
-
-function LogoutButton({ collapsed, onClick }: { collapsed: boolean; onClick: () => void }) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer',
-        color: hovered ? '#EF4444' : '#52525B',
-        padding: 4,
-        borderRadius: 4,
-        display: 'flex',
-        alignItems: 'center',
-        opacity: collapsed ? 0 : 1,
-        maxWidth: collapsed ? 0 : 30,
-        overflow: 'hidden',
-        transition: 'color 150ms ease, opacity 150ms ease, max-width 200ms ease',
-        flexShrink: 0,
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      aria-label="Cerrar sesión"
-    >
-      <IconLogout />
-    </button>
-  );
-}
-
-// ─── Nav data ─────────────────────────────────────────────────────────────────
 
 const mainNav: { id: Screen; label: string; icon: ReactNode }[] = [
   { id: 'inicio',    label: 'Inicio',    icon: <IconHome /> },
@@ -134,20 +27,35 @@ const secondaryNav = [
   { id: 'ayuda',  label: 'Ayuda',         icon: <IconHelp /> },
 ];
 
-// ─── Sidebar ──────────────────────────────────────────────────────────────────
+const estadoLabel: Record<string, string> = {
+  normal:            'Paciente',
+  embarazada:        'Embarazada',
+  adulto_mayor:      'Adulto mayor',
+  'discapacitado/a': 'Discapacitado/a',
+};
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  return (name.slice(0, 2) || 'U').toUpperCase();
+}
 
 export function Sidebar({ active, collapsed, mobile, onNavigate, onLogout }: SidebarProps) {
-  const containerPad = collapsed ? '0' : '0 12px';
+  const { name, estado } = useUser();
+  const initials  = getInitials(name || 'Usuario');
+  const roleLabel = estado ? (estadoLabel[estado] ?? 'Paciente') : 'Paciente';
+
+  const pad = collapsed ? '0 6px' : '0 8px';
 
   return (
     <aside
       style={{
         position: mobile ? 'fixed' : 'relative',
-        top: 0,
-        left: 0,
+        top: 0, left: 0,
         zIndex: mobile ? 50 : undefined,
-        width: mobile ? (collapsed ? 0 : 232) : collapsed ? 48 : 232,
-        transition: 'width 200ms ease',
+        width: mobile ? (collapsed ? 0 : 224) : collapsed ? 52 : 224,
+        minWidth: mobile ? undefined : collapsed ? 52 : 224,
+        transition: 'width 200ms ease, min-width 200ms ease',
         background: '#111114',
         borderRight: mobile && collapsed ? 'none' : '1px solid #1C1C21',
         display: 'flex',
@@ -157,197 +65,191 @@ export function Sidebar({ active, collapsed, mobile, onNavigate, onLogout }: Sid
         flexShrink: 0,
       }}
     >
-      {/* Top section */}
+      {/* ── Brand ── */}
       <div
         style={{
-          padding: containerPad,
-          transition: 'padding 200ms ease',
+          height: 48,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: collapsed ? '0 15px' : '0 16px',
+          borderBottom: '1px solid #1C1C21',
+          flexShrink: 0,
+          justifyContent: collapsed ? 'center' : 'flex-start',
         }}
       >
-        {/* Brand row */}
         <div
           style={{
-            height: 48,
+            width: 22, height: 22,
+            background: '#3B82F6',
+            borderRadius: 5,
             display: 'flex',
             alignItems: 'center',
-            gap: 10,
-            borderBottom: '1px solid #1C1C21',
-            justifyContent: collapsed ? 'center' : 'flex-start',
-            padding: collapsed ? '0' : '0',
+            justifyContent: 'center',
+            fontSize: 10,
+            fontWeight: 700,
+            color: '#fff',
+            flexShrink: 0,
+            letterSpacing: '0.02em',
           }}
         >
-          <div
-            style={{
-              width: 22,
-              height: 22,
-              background: '#3B82F6',
-              borderRadius: 5,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 11,
-              fontWeight: 600,
-              color: '#fff',
-              flexShrink: 0,
-            }}
-          >
-            ST
-          </div>
-          <span
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: '#FAFAFA',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              opacity: collapsed ? 0 : 1,
-              maxWidth: collapsed ? 0 : 160,
-              transition: 'opacity 150ms ease, max-width 200ms ease',
-            }}
-          >
-            Sistema de Turnos
-          </span>
+          ST
         </div>
-
-        {/* Nav label */}
-        <div
+        <span
           style={{
-            fontSize: 9,
-            fontWeight: 500,
-            color: '#52525B',
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
+            fontSize: 13,
+            fontWeight: 600,
+            color: '#FAFAFA',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             opacity: collapsed ? 0 : 1,
-            maxHeight: collapsed ? 0 : 36,
-            padding: collapsed ? '0 10px' : '16px 10px 6px',
-            transition:
-              'opacity 150ms ease, max-height 200ms ease, padding 200ms ease',
+            maxWidth: collapsed ? 0 : 160,
+            transition: 'opacity 150ms ease, max-width 200ms ease',
+            letterSpacing: '-0.01em',
           }}
         >
-          ESPACIO DE TRABAJO
-        </div>
-
-        {/* Main nav */}
-        <nav
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            paddingTop: collapsed ? 8 : 0,
-            transition: 'padding-top 200ms ease',
-          }}
-        >
-          {mainNav.map((item) => (
-            <NavItem
-              key={item.id}
-              icon={item.icon}
-              label={item.label}
-              active={active === item.id}
-              collapsed={collapsed}
-              onClick={() => onNavigate(item.id)}
-            />
-          ))}
-        </nav>
+          Sistema de Turnos
+        </span>
       </div>
 
-      {/* Separator */}
-      <hr
-        style={{
-          border: 'none',
-          borderTop: '1px solid #1C1C21',
-          margin: '8px 0',
-        }}
-      />
-
-      {/* Secondary nav */}
+      {/* ── Nav section label ── */}
       <div
         style={{
-          padding: containerPad,
-          transition: 'padding 200ms ease',
+          opacity: collapsed ? 0 : 1,
+          maxHeight: collapsed ? 0 : 36,
+          overflow: 'hidden',
+          padding: collapsed ? '0 10px' : '14px 18px 6px',
+          transition: 'opacity 150ms ease, max-height 200ms ease, padding 200ms ease',
+        }}
+      >
+        <span className="micro-label">Navegación</span>
+      </div>
+
+      {/* ── Main nav ── */}
+      <nav
+        style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 2,
+          gap: 1,
+          padding: collapsed ? '8px 6px 4px' : '0 8px 4px',
+          transition: 'padding 200ms ease',
+        }}
+      >
+        {mainNav.map((item) => (
+          <button
+            key={item.id}
+            className={[
+              'nav-item',
+              active === item.id ? 'nav-item--active' : '',
+              collapsed ? 'nav-item--collapsed' : '',
+            ].join(' ')}
+            onClick={() => onNavigate(item.id)}
+            onKeyDown={(e) => e.key === 'Enter' && onNavigate(item.id)}
+            title={collapsed ? item.label : undefined}
+          >
+            <span className="nav-item-icon">{item.icon}</span>
+            <span
+              className="nav-item-label"
+              style={{ opacity: collapsed ? 0 : 1, maxWidth: collapsed ? 0 : 140 }}
+            >
+              {item.label}
+            </span>
+          </button>
+        ))}
+      </nav>
+
+      {/* ── Separator ── */}
+      <hr style={{ border: 'none', borderTop: '1px solid #1C1C21', margin: '6px 0' }} />
+
+      {/* ── Secondary nav ── */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1,
+          padding: pad,
+          transition: 'padding 200ms ease',
         }}
       >
         {secondaryNav.map((item) => (
-          <NavItem
+          <button
             key={item.id}
-            icon={item.icon}
-            label={item.label}
-            active={false}
-            collapsed={collapsed}
+            className={['nav-item', collapsed ? 'nav-item--collapsed' : ''].join(' ')}
             onClick={() => {}}
-          />
+            title={collapsed ? item.label : undefined}
+          >
+            <span className="nav-item-icon">{item.icon}</span>
+            <span
+              className="nav-item-label"
+              style={{ opacity: collapsed ? 0 : 1, maxWidth: collapsed ? 0 : 140 }}
+            >
+              {item.label}
+            </span>
+          </button>
         ))}
       </div>
 
-      {/* Spacer */}
       <div style={{ flex: 1 }} />
 
-      {/* User row */}
+      {/* ── User row ── */}
       <div
         style={{
-          padding: '10px 12px',
+          padding: collapsed ? '10px 11px' : '10px 12px',
           borderTop: '1px solid #1C1C21',
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
+          gap: 9,
           justifyContent: collapsed ? 'center' : 'flex-start',
-          minHeight: 52,
+          minHeight: 56,
+          flexShrink: 0,
         }}
       >
         {/* Avatar */}
         <div
           style={{
-            width: 28,
-            height: 28,
+            width: 28, height: 28,
             borderRadius: '50%',
-            background: '#27272A',
-            border: '1px solid #3F3F46',
+            background: 'rgba(59,130,246,0.1)',
+            border: '1px solid rgba(59,130,246,0.2)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: 10,
-            fontWeight: 600,
-            color: '#A0A0AB',
+            fontWeight: 700,
+            color: '#3B82F6',
             flexShrink: 0,
-            letterSpacing: '0.03em',
+            letterSpacing: '0.05em',
           }}
         >
-          CA
+          {initials}
         </div>
 
-        {/* Name + role */}
         {!collapsed && (
-          <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: 500,
-                color: '#FAFAFA',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              Carlos
+          <>
+            <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: '#FAFAFA',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  lineHeight: 1.3,
+                }}
+              >
+                {name || 'Usuario'}
+              </div>
+              <div style={{ fontSize: 11, color: '#52525B', marginTop: 2, lineHeight: 1 }}>
+                {roleLabel}
+              </div>
             </div>
-            <div
-              style={{
-                fontSize: 10,
-                color: '#52525B',
-                whiteSpace: 'nowrap',
-                marginTop: 1,
-              }}
-            >
-              Paciente
-            </div>
-          </div>
-        )}
 
-        <LogoutButton collapsed={collapsed} onClick={onLogout} />
+            <button className="logout-btn" onClick={onLogout} aria-label="Cerrar sesión">
+              <IconLogout />
+            </button>
+          </>
+        )}
       </div>
     </aside>
   );

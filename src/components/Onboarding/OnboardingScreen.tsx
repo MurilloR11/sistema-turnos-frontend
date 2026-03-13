@@ -5,7 +5,7 @@ import socket from '../../services/socket';
 
 export function OnboardingScreen() {
   const { register } = useUser();
-  const [name, setName] = useState('');
+  const [name,   setName]   = useState('');
   const [estado, setEstado] = useState<UserEstado | null>(null);
 
   const isFormValid = name.trim().length > 0 && estado !== null;
@@ -13,7 +13,6 @@ export function OnboardingScreen() {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isFormValid || estado === null) return;
-
     const trimmedName = name.trim();
     socket.emit('presence:online', { username: trimmedName, estado });
     register({ name: trimmedName, estado });
@@ -22,7 +21,7 @@ export function OnboardingScreen() {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center px-4"
-      style={{ background: '#0C0C0E', fontFamily: "'DM Sans', sans-serif" }}
+      style={{ background: '#09090B', fontFamily: "'DM Sans', sans-serif" }}
       role="dialog"
       aria-modal="true"
       aria-label="Registro de usuario"
@@ -31,11 +30,11 @@ export function OnboardingScreen() {
         style={{
           width: '100%',
           maxWidth: '380px',
-          background: '#111115',
+          background: '#111114',
           border: '1px solid #1E1E24',
-          borderRadius: '8px',
+          borderRadius: '10px',
           padding: '36px 32px',
-          animation: 'onboardingIn 400ms cubic-bezier(0.16, 1, 0.3, 1) both',
+          animation: 'onboardingIn 380ms cubic-bezier(0.16,1,0.3,1) both',
         }}
       >
         {/* Eyebrow */}
@@ -46,7 +45,7 @@ export function OnboardingScreen() {
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
             color: '#3B82F6',
-            margin: '0 0 16px',
+            margin: '0 0 14px',
           }}
         >
           Acceso
@@ -55,11 +54,11 @@ export function OnboardingScreen() {
         {/* Heading */}
         <h1
           style={{
-            fontSize: '22px',
-            fontWeight: 400,
-            letterSpacing: '-0.02em',
+            fontSize: '21px',
+            fontWeight: 500,
+            letterSpacing: '-0.025em',
             color: '#EDEDED',
-            margin: '0 0 8px',
+            margin: '0 0 6px',
             lineHeight: 1.3,
           }}
         >
@@ -71,7 +70,7 @@ export function OnboardingScreen() {
           style={{
             fontSize: '13px',
             fontWeight: 300,
-            color: '#4B5563',
+            color: '#52525B',
             margin: '0 0 32px',
             lineHeight: 1.5,
           }}
@@ -79,10 +78,9 @@ export function OnboardingScreen() {
           Completa los datos para acceder a la aplicación
         </p>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} noValidate>
-          {/* Nombre completo */}
-          <div style={{ marginBottom: '28px' }}>
+          {/* Nombre */}
+          <div style={{ marginBottom: '26px' }}>
             <label
               htmlFor="onboarding-name"
               style={{
@@ -91,7 +89,7 @@ export function OnboardingScreen() {
                 fontWeight: 500,
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
-                color: '#4B5563',
+                color: '#52525B',
                 marginBottom: '12px',
               }}
             >
@@ -120,12 +118,8 @@ export function OnboardingScreen() {
                 transition: 'border-color 200ms',
                 fontFamily: 'inherit',
               }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderBottomColor = '#3B82F6';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderBottomColor = '#1E1E24';
-              }}
+              onFocus={(e)  => { e.currentTarget.style.borderBottomColor = '#3B82F6'; }}
+              onBlur={(e)   => { e.currentTarget.style.borderBottomColor = '#1E1E24'; }}
             />
           </div>
 
@@ -139,7 +133,7 @@ export function OnboardingScreen() {
                 fontWeight: 500,
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
-                color: '#4B5563',
+                color: '#52525B',
                 marginBottom: '12px',
               }}
             >
@@ -155,28 +149,19 @@ export function OnboardingScreen() {
             aria-disabled={!isFormValid}
             style={{
               width: '100%',
-              padding: '13px',
-              borderRadius: '6px',
-              fontSize: '14px',
-              fontWeight: 400,
+              padding: '12px',
+              borderRadius: '7px',
+              fontSize: '13px',
+              fontWeight: 500,
               cursor: isFormValid ? 'pointer' : 'not-allowed',
-              background: 'transparent',
-              border: `1px solid ${isFormValid ? '#3B82F6' : '#1E1E24'}`,
-              color: isFormValid ? '#3B82F6' : '#2A2A38',
-              transition: 'all 200ms',
+              background: isFormValid
+                ? 'linear-gradient(180deg,#3B82F6 0%,#2563EB 100%)'
+                : 'transparent',
+              border: `1px solid ${isFormValid ? 'transparent' : '#1E1E24'}`,
+              color: isFormValid ? '#fff' : '#2A2A38',
+              transition: 'background 200ms, border-color 200ms, color 200ms',
               fontFamily: 'inherit',
-            }}
-            onMouseEnter={(e) => {
-              if (isFormValid) {
-                e.currentTarget.style.background = '#3B82F6';
-                e.currentTarget.style.color = '#FFFFFF';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (isFormValid) {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = '#3B82F6';
-              }
+              boxShadow: isFormValid ? '0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)' : 'none',
             }}
           >
             Ingresar a la aplicación

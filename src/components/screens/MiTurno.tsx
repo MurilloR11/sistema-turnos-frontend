@@ -1,58 +1,30 @@
-import { useState } from 'react';
 import { Dot } from '../ui/Dot';
 import { PulseDot } from '../ui/PulseDot';
 import { InfoCard } from '../ui/InfoCard';
 import { IconClock, IconZap, IconTicket } from '../ui/icons';
+import { useUser } from '../../context/UserContext';
 
-const mono = { fontFamily: "'Geist Mono', 'Courier New', monospace" };
-
-function CancelButton() {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <button
-      className="btn-outline-danger"
-      style={{
-        background: hovered ? 'rgba(239,68,68,0.06)' : 'transparent',
-        borderColor: hovered ? '#EF4444' : '#27272A',
-        color: hovered ? '#EF4444' : '#71717A',
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      Cancelar mi turno
-    </button>
-  );
-}
+const estadoInfo: Record<string, { label: string; dotColor: 'amber' | 'green' | 'red'; priority: string; priorityDesc: string }> = {
+  normal:            { label: 'Normal',         dotColor: 'green', priority: 'Estándar', priorityDesc: 'Cola general' },
+  embarazada:        { label: 'Embarazada',      dotColor: 'amber', priority: 'Media',    priorityDesc: 'Antes que Estándar' },
+  adulto_mayor:      { label: 'Adulto mayor',    dotColor: 'amber', priority: 'Media',    priorityDesc: 'Antes que Estándar' },
+  'discapacitado/a': { label: 'Discapacitado/a', dotColor: 'amber', priority: 'Media',    priorityDesc: 'Antes que Estándar' },
+};
 
 export function MiTurno() {
+  const { estado } = useUser();
+  const info = (estado && estadoInfo[estado]) ?? estadoInfo.normal;
+
   return (
     <div>
-      <h1
-        style={{
-          fontSize: 18,
-          fontWeight: 600,
-          color: '#FAFAFA',
-          letterSpacing: '-0.02em',
-          margin: 0,
-        }}
-      >
-        Mi Turno
-      </h1>
-      <p style={{ fontSize: 13, color: '#71717A', marginTop: 4 }}>
-        Estado actual de tu posición en la fila
-      </p>
+      <h1 className="screen-title">Mi Turno</h1>
+      <p className="screen-subtitle">Estado actual de tu posición en la fila</p>
 
       <div className="queue-grid">
-        {/* Main turno card */}
+        {/* ── Main turno card ── */}
         <div className="main-card">
-          {/* Header */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
+          {/* Header row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div className="icon-box icon-box--blue">
                 <IconTicket size={13} />
@@ -63,37 +35,28 @@ export function MiTurno() {
                   fontWeight: 600,
                   color: '#71717A',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
+                  letterSpacing: '0.07em',
                 }}
               >
                 Turno activo
               </span>
             </div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                background: 'rgba(245,158,11,0.06)',
-                border: '1px solid rgba(245,158,11,0.12)',
-                borderRadius: 999,
-                padding: '3px 10px 3px 8px',
-              }}
-            >
+
+            <span className="badge badge--amber">
               <Dot color="amber" />
-              <span style={{ fontSize: 11, fontWeight: 500, color: '#F59E0B' }}>Pendiente</span>
-            </div>
+              Pendiente
+            </span>
           </div>
 
-          {/* Position block */}
-          <div style={{ marginTop: 20, marginBottom: 20 }}>
+          {/* Large position number */}
+          <div style={{ margin: '22px 0 20px' }}>
             <div
+              className="mono"
               style={{
-                ...mono,
-                fontSize: 48,
+                fontSize: 52,
                 fontWeight: 600,
                 color: '#FAFAFA',
-                letterSpacing: '-3px',
+                letterSpacing: '-4px',
                 lineHeight: 1,
               }}
             >
@@ -107,25 +70,12 @@ export function MiTurno() {
           <div className="card-divider" />
 
           {/* Info grid 2×2 */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 20,
-            }}
-          >
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
             <div className="info-cell">
               <div className="micro-label">Hora de solicitud</div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  marginTop: 6,
-                }}
-              >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ color: '#52525B', display: 'flex' }}><IconClock size={13} /></span>
-                <span style={{ ...mono, fontSize: 13, fontWeight: 500, color: '#FAFAFA' }}>
+                <span className="mono" style={{ fontSize: 13, fontWeight: 500, color: '#FAFAFA' }}>
                   08:17 a.m.
                 </span>
               </div>
@@ -133,23 +83,26 @@ export function MiTurno() {
 
             <div className="info-cell">
               <div className="micro-label">Personas antes</div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: '#FAFAFA', marginTop: 6 }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: '#FAFAFA' }}>
                 4 personas
               </div>
             </div>
 
             <div className="info-cell">
               <div className="micro-label">Tu estado</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
-                <Dot color="amber" />
-                <span style={{ fontSize: 13, fontWeight: 500, color: '#FAFAFA' }}>Embarazada</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Dot color={info.dotColor} />
+                <span style={{ fontSize: 13, fontWeight: 500, color: '#FAFAFA' }}>
+                  {info.label}
+                </span>
               </div>
             </div>
 
             <div className="info-cell">
-              <div className="micro-label">Posición en fila</div>
-              <div style={{ ...mono, fontSize: 13, fontWeight: 500, color: '#FAFAFA', marginTop: 6 }}>
-                #5 de 12
+              <div className="micro-label">Tiempo estimado</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ color: '#52525B', display: 'flex' }}><IconClock size={13} /></span>
+                <span style={{ fontSize: 13, fontWeight: 500, color: '#FAFAFA' }}>~15 min</span>
               </div>
             </div>
           </div>
@@ -158,13 +111,11 @@ export function MiTurno() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <PulseDot />
-            <span style={{ fontSize: 12, color: '#52525B' }}>
-              Actualizando en tiempo real
-            </span>
+            <span style={{ fontSize: 12, color: '#52525B' }}>Actualizando en tiempo real</span>
           </div>
         </div>
 
-        {/* Right column */}
+        {/* ── Right column ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <InfoCard title="Prioridad">
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -172,18 +123,16 @@ export function MiTurno() {
                 <IconZap size={15} />
               </div>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: '#FAFAFA' }}>
-                  Media
-                </div>
-                <div style={{ fontSize: 11, color: '#52525B', marginTop: 2 }}>
-                  Antes que Estándar
-                </div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#FAFAFA' }}>{info.priority}</div>
+                <div style={{ fontSize: 11, color: '#52525B', marginTop: 3 }}>{info.priorityDesc}</div>
               </div>
             </div>
           </InfoCard>
 
           <InfoCard title="Acciones">
-            <CancelButton />
+            <button className="btn-outline-danger">
+              Cancelar mi turno
+            </button>
           </InfoCard>
         </div>
       </div>
