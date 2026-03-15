@@ -1,13 +1,14 @@
 ﻿import { useState, useEffect } from 'react';
-import { Sidebar } from './components/Sidebar';
-import { Topbar } from './components/Topbar';
+import { Sidebar } from './components/layout/Sidebar';
+import { Topbar } from './components/layout/Topbar';
 import { Inicio } from './components/screens/Inicio';
 import { MiTurno } from './components/screens/MiTurno';
 import { Solicitar } from './components/screens/Solicitar';
-import { Chat } from './components/Chat';
+import { Chat } from './components/Chat/Chat';
 import { OnboardingScreen } from './components/Onboarding/OnboardingScreen';
+import { AdminApp } from './admin/AdminApp';
 import { useUser } from './context/UserContext';
-import type { Screen } from './components/Sidebar';
+import type { Screen } from './components/layout/Sidebar';
 import './index.css';
 
 const screenTitles: Record<Screen, string> = {
@@ -22,6 +23,7 @@ function App() {
   const [screen, setScreen] = useState<Screen>('inicio');
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  const [adminName, setAdminName] = useState<string | null>(null);
 
   useEffect(() => {
     const check = () => {
@@ -34,8 +36,12 @@ function App() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  if (adminName !== null) {
+    return <AdminApp adminName={adminName} onLogout={() => setAdminName(null)} />;
+  }
+
   if (!isRegistered) {
-    return <OnboardingScreen />;
+    return <OnboardingScreen onAdminLogin={(name) => setAdminName(name)} />;
   }
 
   return (
@@ -89,8 +95,10 @@ function App() {
         <main
           style={{
             flex: 1,
-            overflowY: 'auto',
-            padding: isMobile ? '16px 12px' : '28px 32px',
+            overflowY: screen === 'chat' ? 'hidden' : 'auto',
+            padding: screen === 'chat'
+              ? (isMobile ? '0 12px' : '0 32px')
+              : (isMobile ? '16px 12px' : '28px 32px'),
             background: '#09090B',
           }}
         >

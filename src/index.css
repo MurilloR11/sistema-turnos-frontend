@@ -449,5 +449,32 @@ select.form-input option, select option {
   .breadcrumb-sep { display: none; }
 }
 
+/* ── Solicitar two-panel ─────────────────────────────────────────────── */
+.solicitar-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 30%, 400px);
+  gap: 32px;
+  align-items: start;
+  width: 100%;
+  padding: 24px 32px 0;
+}
+.solicitar-summary {
+  position: sticky;
+  top: 28px;
+}
+@media (max-width: 768px) {
+  .solicitar-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px 12px 0;
+  }
+  .solicitar-summary {
+    position: static;
+  }
+  .solicitar-header {
+    padding: 0 12px;
+  }
+}
+
 /* ── Onboarding ─────────────────────────────────────────────────────── */
 #onboarding-name::placeholder { color: #2A2A32; }

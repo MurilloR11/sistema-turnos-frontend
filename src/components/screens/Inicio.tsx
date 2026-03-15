@@ -2,7 +2,7 @@ import { StatCard } from '../ui/StatCard';
 import { Dot } from '../ui/Dot';
 import { IconTicket, IconClock } from '../ui/icons';
 import { useUser } from '../../context/UserContext';
-import type { Screen } from '../Sidebar';
+import type { Screen } from '../layout/Sidebar';
 
 interface InicioProps {
   onNavigate: (screen: Screen) => void;

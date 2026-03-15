@@ -1,45 +1,56 @@
 import { useState } from 'react';
 import { IconPlusCircle } from '../ui/icons';
-import type { Screen } from '../Sidebar';
+import { Dot } from '../ui/Dot';
+import type { Screen } from '../layout/Sidebar';
 
 interface SolicitarProps {
   onNavigate: (screen: Screen) => void;
 }
 
-const priorityLabels: Record<string, string> = {
-  alta:     'Alta — Emergencia',
-  media:    'Media — Embarazada / Adulto mayor',
-  estandar: 'Estándar — Consulta normal',
-};
+const priorityOptions: {
+  value: string;
+  full: string;
+  sub: string;
+  dot?: 'amber' | 'red';
+}[] = [
+  { value: 'alta',     full: 'Alta — Emergencia',                 sub: 'Atención inmediata',    dot: 'red'   },
+  { value: 'media',    full: 'Media — Embarazada / Adulto mayor', sub: 'Prioridad de atención', dot: 'amber' },
+  { value: 'estandar', full: 'Estándar — Consulta normal',        sub: 'Orden de llegada' },
+];
 
 export function Solicitar({ onNavigate }: SolicitarProps) {
-  const [motivo,   setMotivo]   = useState('');
+  const [motivo,    setMotivo]    = useState('');
   const [prioridad, setPrioridad] = useState('');
-  const [notas,    setNotas]    = useState('');
+  const [notas,     setNotas]     = useState('');
 
   const canSubmit = motivo.trim() !== '' && prioridad !== '';
+  const selected  = priorityOptions.find(p => p.value === prioridad);
+  const filled    = [motivo.trim() !== '', prioridad !== ''].filter(Boolean).length;
 
   return (
     <div>
       <h1 className="screen-title">Solicitar turno</h1>
-      <p className="screen-subtitle">Completa la información para unirte a la fila</p>
+      <p className="screen-subtitle">Completa la información para unirte a la fila de espera</p>
 
-      <div style={{ maxWidth: 480, marginTop: 24 }}>
+      <form
+        style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 22 }}
+        onSubmit={(e) => { e.preventDefault(); if (canSubmit) onNavigate('miturno'); }}
+      >
         {/* Card header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 22 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div className="icon-box icon-box--blue">
             <IconPlusCircle size={15} />
           </div>
           <div>
             <div className="card-header-title">Nuevo turno</div>
-            <div className="card-header-sub">Completa los campos requeridos</div>
+            <div className="card-header-sub">{filled}/2 campos requeridos completados</div>
           </div>
         </div>
 
         {/* Motivo */}
-        <div style={{ marginBottom: 18 }}>
+        <div>
           <label className="form-label" htmlFor="sol-motivo">
-            Motivo de consulta <span style={{ color: '#EF4444' }}>*</span>
+            Motivo de consulta <span style={{ color: 'var(--red)' }}>*</span>
           </label>
           <input
             id="sol-motivo"
@@ -48,33 +59,50 @@ export function Solicitar({ onNavigate }: SolicitarProps) {
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
             placeholder="Ej: Consulta general, control prenatal..."
+            autoComplete="off"
           />
         </div>
 
         {/* Prioridad */}
-        <div style={{ marginBottom: 18 }}>
+        <div>
           <label className="form-label" htmlFor="sol-prioridad">
-            Prioridad <span style={{ color: '#EF4444' }}>*</span>
+            Prioridad <span style={{ color: 'var(--red)' }}>*</span>
           </label>
           <select
             id="sol-prioridad"
             className="form-input"
             value={prioridad}
             onChange={(e) => setPrioridad(e.target.value)}
-            style={{ color: prioridad ? '#FAFAFA' : '#52525B' }}
+            style={{ color: prioridad ? 'var(--text-1)' : 'var(--text-4)' }}
           >
             <option value="" disabled>Selecciona tu prioridad</option>
-            <option value="alta">Alta — Emergencia</option>
-            <option value="media">Media — Embarazada / Adulto mayor</option>
-            <option value="estandar">Estándar — Consulta normal</option>
+            {priorityOptions.map(p => (
+              <option key={p.value} value={p.value}>{p.full}</option>
+            ))}
           </select>
+
+          {selected && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 7,
+              marginTop: 8, padding: '7px 10px',
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--r-sm)',
+            }}>
+              {selected.dot
+                ? <Dot color={selected.dot} />
+                : <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--text-4)', display: 'inline-block', flexShrink: 0 }} />
+              }
+              <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{selected.sub}</span>
+            </div>
+          )}
         </div>
 
         {/* Notas */}
-        <div style={{ marginBottom: 20 }}>
+        <div>
           <label className="form-label" htmlFor="sol-notas">
             Notas adicionales{' '}
-            <span style={{ color: '#52525B', fontWeight: 400 }}>(opcional)</span>
+            <span style={{ color: 'var(--text-4)', fontWeight: 400 }}>(opcional)</span>
           </label>
           <textarea
             id="sol-notas"
@@ -82,47 +110,22 @@ export function Solicitar({ onNavigate }: SolicitarProps) {
             value={notas}
             onChange={(e) => setNotas(e.target.value)}
             placeholder="Información adicional relevante..."
-            rows={3}
+            rows={4}
           />
         </div>
 
-        {/* Preview summary */}
-        {canSubmit && (
-          <div
-            style={{
-              background: 'rgba(59,130,246,0.04)',
-              border: '1px solid rgba(59,130,246,0.1)',
-              borderRadius: 8,
-              padding: '12px 14px',
-              marginBottom: 16,
-            }}
-          >
-            <div className="micro-label" style={{ marginBottom: 8 }}>Resumen</div>
-            <div style={{ fontSize: 12, color: '#A0A0AB', lineHeight: 1.7 }}>
-              <span style={{ color: '#52525B' }}>Motivo: </span>
-              <span style={{ color: '#FAFAFA' }}>{motivo}</span>
-              <br />
-              <span style={{ color: '#52525B' }}>Prioridad: </span>
-              <span style={{ color: '#FAFAFA' }}>{priorityLabels[prioridad] ?? prioridad}</span>
-              {notas && (
-                <>
-                  <br />
-                  <span style={{ color: '#52525B' }}>Notas: </span>
-                  <span style={{ color: '#FAFAFA' }}>{notas}</span>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-
-        <button
-          className="btn-primary"
-          disabled={!canSubmit}
-          onClick={() => canSubmit && onNavigate('miturno')}
-        >
-          Confirmar y solicitar turno
-        </button>
-      </div>
+        {/* Submit */}
+        <div style={{ paddingTop: 4 }}>
+          <button type="submit" className="btn-primary" disabled={!canSubmit}>
+            Confirmar y solicitar turno
+          </button>
+          {!canSubmit && (
+            <p style={{ fontSize: 11, color: 'var(--text-4)', textAlign: 'center', marginTop: 8 }}>
+              Completa los campos requeridos para continuar
+            </p>
+          )}
+        </div>
+      </form>
     </div>
   );
 }

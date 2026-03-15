@@ -1,0 +1,178 @@
+/* ========== TURNOS LIST — dark theme ========== */
+
+.tl-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* ========== LOADING ========== */
+
+.tl-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.tl-spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid #1C1C21;
+  border-top-color: #3B82F6;
+  border-radius: 50%;
+  animation: tlSpin 0.8s linear infinite;
+}
+
+@keyframes tlSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ========== EMPTY ========== */
+
+.tl-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 72px 0;
+  text-align: center;
+}
+
+.tl-empty-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #131316;
+  border: 1px solid #1C1C21;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3F3F46;
+}
+
+/* ========== GRID ========== */
+
+.tl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+/* ========== CARD ========== */
+
+.tl-card {
+  background: #111114;
+  border: 1px solid #1E1E23;
+  border-radius: 12px;
+  padding: 16px;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.tl-card:hover {
+  border-color: #27272A;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+}
+
+.tl-card--confirmado { border-left: 3px solid rgba(34,197,94,0.5); }
+.tl-card--pendiente  { border-left: 3px solid rgba(245,158,11,0.5); }
+.tl-card--cancelado  { border-left: 3px solid rgba(239,68,68,0.4); opacity: 0.65; }
+
+/* ========== CARD HEADER ========== */
+
+.tl-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ========== INFO ROWS ========== */
+
+.tl-info-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tl-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.tl-row-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid #1C1C21;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #52525B;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ========== DATE & TIME ========== */
+
+.tl-datetime {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+  border-top: 1px solid #1E1E23;
+  border-bottom: 1px solid #1E1E23;
+  margin-bottom: 12px;
+}
+
+/* ========== ACTIONS ========== */
+
+.tl-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tl-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid;
+  font-family: 'Inter', sans-serif;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+  outline: none;
+}
+
+.tl-btn--confirm {
+  background: rgba(34,197,94,0.08);
+  border-color: rgba(34,197,94,0.2);
+  color: #22C55E;
+}
+.tl-btn--confirm:hover {
+  background: rgba(34,197,94,0.14);
+  border-color: rgba(34,197,94,0.35);
+}
+
+.tl-btn--cancel {
+  background: transparent;
+  border-color: #27272A;
+  color: #71717A;
+}
+.tl-btn--cancel:hover {
+  background: rgba(239,68,68,0.06);
+  border-color: rgba(239,68,68,0.3);
+  color: #EF4444;
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 640px) {
+  .tl-grid { grid-template-columns: 1fr; }
+  .tl-header { flex-direction: column; gap: 8px; }
+}
