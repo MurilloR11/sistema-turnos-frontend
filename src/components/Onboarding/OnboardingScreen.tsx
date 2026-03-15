@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useUser, type UserEstado } from '../../context/UserContext';
 import { CustomDropdown } from './CustomDropdown';
 import socket from '../../services/socket';
+import { toast } from 'react-toastify';
 
 type View = 'user' | 'admin';
 
@@ -104,12 +105,14 @@ export function OnboardingScreen({ onAdminLogin }: OnboardingScreenProps) {
     const trimmedName = name.trim();
     socket.emit('presence:online', { username: trimmedName, estado });
     register({ name: trimmedName, estado });
+    toast.success(`Bienvenido, ${trimmedName}`);
   };
 
   const handleAdmin = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (isAdminValid) {
       onAdminLogin?.('Administrador');
+      toast.success('Bienvenido, Administrador');
     }
   };
 
